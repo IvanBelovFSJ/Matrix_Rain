@@ -83,7 +83,7 @@ public class Matrix_Rain extends JFrame {
 		int columnNumCheck, int[] columnPositions,
 		JLabel[][] labelArray, int[][] characterSymbol, Color characterColor) {
 		FONT_SIZE = ( random.nextInt(40) + 20 ); // new font for each iteration.
-		columnNumCheck = random.nextInt(50) + 5;	// +1 prevents ever picking zero columns to display.
+		columnNumCheck = ( random.nextInt(50) + 5 );	// +1 prevents ever picking zero columns to display.
 		columnPositions = new int[columnNumCheck]; // An array of integers is set to host random positions of column
 		labelArray = new JLabel[columnPositions.length][]; // create N amount of label arrays
 		characterSymbol = new int[columnPositions.length][]; // An array of Characters
@@ -100,7 +100,7 @@ public class Matrix_Rain extends JFrame {
 	public static void createColumnsAssignLengths
 	(int columnNumCheckP, JLabel[][] labelArrayP, int[][] characterSymbolP) {
 		for (int i = 0; i < columnNumCheckP; i++) {
-			int randomLength = random.nextInt(10) + 5;
+			int randomLength = random.nextInt(15) + 5;
 			labelArrayP[i] = new JLabel[randomLength];
 			characterSymbolP[i] = new int[randomLength];
 	} /* End of for loop */ } // End of createColumnsAssignLengths
