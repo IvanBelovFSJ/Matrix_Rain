@@ -1,136 +1,87 @@
-import java.awt.Color;
-import java.awt.Font;
-import java.util.Random;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 /*
- *	Most of the below code was found at:
- *				https://stackoverflow.com/questions/4710693/java-falling-matrix-code-like-the-movie-continued
- *	posted by:	javaDude.
- *
- *	Below code was adjusted to the needed specifications.
+ * Matrix_Rain simulates the character 'rain' effect from the movie The Matrix
  */
+import javax.swing.*;
+import java.awt.*;
+import java.util.Random;
 
-@SuppressWarnings("serial")
-public class Matrix_Rain extends JFrame {
-	public static JPanel screen = new JPanel(null); // Creates an instance of JPanel object - memory address.
-	public static Random random = new Random(); // Creates an instance of Random object - memory address.
-	public static int FONT_SIZE; // Font of the characters populated in the label and outputted on the JPanel.
-	public final static String TEXT = new String("あたアカサザジズゼゾスセソキクケコイウエオャな"); // String with Japanese characters
-	public static int columnNumCheck; // Helps facilitate a mechanism preventing from ever having to display
-	public static int[] columnPositions;
-	public static JLabel[][] labelArray;
-	public static int[][] characterSymbol;
-	public static Color characterColor;
-	
-	public Matrix_Rain() {
-	Color backgroundColor = new Color(13, 2, 8); // Setting a color.
-	this.add(screen); // Adding panel to this class.
-	screen.setBackground(backgroundColor); /* Setting background color. */ } // end of Matrix_Rain()
+public class Matrix_Rain extends JPanel {
+    private static final String TEXT =
+            "アイウエオカキクケコサシスセソタチツテトナニヌネノあいうえお";
+    private static final int FONT_SIZE = 18;
+    private final Random random = new Random();
+    private int columns;
+    private int[] y;
+    private int[] speed;
+    private int[] length;
 
-	public static void fade(Color colorP, JLabel[][] labelArray) {
-		int R = 0;
-		int G = 255;
-		int B = 85;
-	while ((G != 0) && (B !=0 )) {	
-		G = G - 3;
-		B = B - 1;
-	for (int screenRow = 0; screenRow < labelArray.length; screenRow++) {
-		colorP = new Color(R, G, B); // Setting a color for drop down characters.
-	try { if ( ( screenRow >= (labelArray.length) ) ) { break; }
-	for (int columnCount = 0; columnCount < labelArray[screenRow].length; columnCount++) {
-	if ( ( columnCount >= labelArray[screenRow].length ) ) { break; }
-	labelArray[screenRow][columnCount].setForeground(colorP);
-	screen.repaint(); } // End of population for lopp
-		Thread.sleep(2); // The speed of characters appearing on the window
-		screen.repaint(); } // End of try statement
-	catch (Exception e) {
-	    throw new NullPointerException(
-	    " corrupt data #1 ");
-	} /* End of catch statement */ } /* End of for */ } /* End of while */ } // End of fade
+    public Matrix_Rain() {
+        setBackground(Color.BLACK);
+        Timer timer = new Timer(120, e -> repaint()); // ~120 FPS
+        timer.start();	}
 
-	private static void printCharacters(int[] columnPositions, JLabel[][] labelArray, int[][] characterSymbol) {
-		for (int screenRow = 0; screenRow < columnPositions.length; screenRow++) {
-		int changingDepth = random.nextInt(50)+1;
-		if ( ( screenRow >= columnPositions.length ) ) { break; }
-		for (int columnCount = 0; columnCount < labelArray[screenRow].length; columnCount++) {
-		if ( ( columnCount >= labelArray[screenRow].length) ) { break; }
-		try {
-			characterSymbol[screenRow][columnCount] = random.nextInt(TEXT.length()); // Character array element in each column is
-			labelArray[screenRow][columnCount] = new JLabel("" + TEXT.charAt(characterSymbol[screenRow][columnCount]));
-			screen.add(labelArray[screenRow][columnCount]); // Each label is added to a screen.
-			labelArray[screenRow][columnCount].setFont(new Font(Font.SANS_SERIF, Font.PLAIN, FONT_SIZE));
-			labelArray[screenRow][columnCount].setForeground(characterColor); // Setting each label's foreground color.
-			labelArray[screenRow][columnCount].setBounds(
-				columnPositions[screenRow], (columnCount + changingDepth ) * FONT_SIZE, FONT_SIZE, FONT_SIZE);
-			Thread.sleep(50); } // End of try statement
-		catch (Exception e) { throw new NullPointerException(
-	        " corrupt data #2 "); } /* End of catch statement */ }
-	} /* End of for loop */ } // End of printCharacters()
+    private void initialize() {
+        int width = getWidth();
+        int height = getHeight();
+        columns = width / FONT_SIZE;
+        y = new int[columns];
+        speed = new int[columns];
+        length = new int[columns];
 
-	private static void erase(JLabel[][] labelArray) {		
-		try {
-		for (int screenRow = 0; screenRow < labelArray.length; screenRow++) {
-		if ( screenRow > labelArray.length ) { break; }
-		for (int columnCount = 0; columnCount < labelArray[screenRow].length; columnCount++) {
-			if ( columnCount > labelArray[screenRow].length ) { break; }
-				screen.remove(labelArray[screenRow][columnCount]);
-				screen.repaint(); } /* End of population for loop */ } }
-		catch (Exception e) { throw new NullPointerException(" corrupt data #3 "); } }
+        for (int i = 0; i < columns; i++) {
+            y[i] = random.nextInt(height);
+            speed[i] = random.nextInt(5) + 1;
+            length[i] = random.nextInt(25) + 15;	}	}
 
-	public static void initializeVariables(int FONT_SIZE,
-		int columnNumCheck, int[] columnPositions,
-		JLabel[][] labelArray, int[][] characterSymbol, Color characterColor) {
-		FONT_SIZE = ( random.nextInt(40) + 20 ); // new font for each iteration.
-		columnNumCheck = ( random.nextInt(50) + 5 );	// +1 prevents ever picking zero columns to display.
-		columnPositions = new int[columnNumCheck]; // An array of integers is set to host random positions of column
-		labelArray = new JLabel[columnPositions.length][]; // create N amount of label arrays
-		characterSymbol = new int[columnPositions.length][]; // An array of Characters
-		characterColor = new Color(0, 255, 65); /* Setting a color for drop down characters. */ }
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        if (y == null) initialize();
+        // motion blur fade
+        g2.setColor(new Color(0, 0, 0, 40));
+        g2.fillRect(0, 0, getWidth(), getHeight());
+        g2.setFont(new Font("MS Gothic", Font.PLAIN, FONT_SIZE));
+        int height = getHeight();
 
-	public static void assignColumnPositions(int[] columnPositions) {
-		try { for (int count = 0; count < columnPositions.length; count++) {
-				int intermediateStorage = random.nextInt(screen.getWidth() + 1 );
-				columnPositions[count] = intermediateStorage;
-			} /* End of for */ } catch (Exception e) {
-		throw new NullPointerException(" corrupt data #4 ");
-	} } // End of assignColumnPositions
+        for (int i = 0; i < columns; i++) {
+            int x = i * FONT_SIZE;
+            // head character
+            char c = TEXT.charAt(random.nextInt(TEXT.length()));
+            // glow effect
+            drawGlow(g2, String.valueOf(c), x, y[i]);
 
-	public static void createColumnsAssignLengths
-	(int columnNumCheckP, JLabel[][] labelArrayP, int[][] characterSymbolP) {
-		for (int i = 0; i < columnNumCheckP; i++) {
-			int randomLength = random.nextInt(15) + 5;
-			labelArrayP[i] = new JLabel[randomLength];
-			characterSymbolP[i] = new int[randomLength];
-	} /* End of for loop */ } // End of createColumnsAssignLengths
+            // trailing characters
+            for (int j = 1; j < length[i]; j++) {
+                int tailY = y[i] - j * FONT_SIZE;
+                if (tailY < 0) break;
+                float alpha = 1f - ((float) j / length[i]);
+                int green = 180 + random.nextInt(75);
+                g2.setColor(new Color(0, green, 70, (int) (alpha * 255)));
+                char tailChar = TEXT.charAt(random.nextInt(TEXT.length()));
+                g2.drawString(String.valueOf(tailChar), x, tailY);	}
 
+            y[i] += speed[i] * FONT_SIZE;
+            
+            if (y[i] > height + random.nextInt(2000)) {
+                y[i] = 0;
+                speed[i] = random.nextInt(2) + 1;
+                length[i] = random.nextInt(30) + 10;	}	}	}
 
-	private static void dripCharacteres(JLabel[][] labelArrayP)
-	{
-		
-	}
-	
-	@SuppressWarnings("static-access")
-	public static void main(String[] args) {
-		Matrix_Rain frame = new Matrix_Rain();
-		while (true) {
-			FONT_SIZE = ( random.nextInt(30) + 15 ); // new font for each iteration.
-			columnNumCheck = random.nextInt(10) + 5;	// +1 prevents ever picking zero columns to display.
-			columnPositions = new int[columnNumCheck]; // An array of integers is set to host random positions of column
-			labelArray = new JLabel[columnPositions.length][]; // create N amount of label arrays
-			characterSymbol = new int[columnPositions.length][]; // An array of Characters
-			characterColor = new Color(0, 255, 65); /* Setting a color for drop down characters. */
-			
-			frame.setExtendedState(frame.MAXIMIZED_BOTH); // This program's display is set to be fully expanded based on
-			frame.setVisible(true);
-			frame.setLocationRelativeTo(null);
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			
-			createColumnsAssignLengths(columnNumCheck, labelArray, characterSymbol);
-			assignColumnPositions(columnPositions);
-			printCharacters(columnPositions, labelArray, characterSymbol);
-			dripCharacteres(labelArray);
-			fade(characterColor,labelArray);
-			erase(labelArray);
-	} } /* End of Main() */ } // End of Matrix_Rain class
+    private void drawGlow(Graphics2D g2, String text, int x, int y) {
+
+        for (int i = 6; i >= 1; i--) {
+            int alpha = 30 / i;
+            g2.setColor(new Color(0, 255, 120, alpha));
+            g2.drawString(text, x, y);	}
+
+        g2.setColor(Color.WHITE);
+        g2.drawString(text, x, y);	}
+
+    public static void main(String[] args) {
+
+        JFrame frame = new JFrame("Matrix Rain");
+        Matrix_Rain rain = new Matrix_Rain();
+        frame.add(rain);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);	}	}
